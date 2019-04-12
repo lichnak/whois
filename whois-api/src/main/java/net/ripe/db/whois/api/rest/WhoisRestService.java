@@ -40,11 +40,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.List;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import static net.ripe.db.whois.api.rest.RestServiceHelper.getServerAttributeMapper;
 import static net.ripe.db.whois.api.rest.RestServiceHelper.isQueryParamSet;
 import static net.ripe.db.whois.common.domain.CIString.ciString;
@@ -55,6 +56,12 @@ import static net.ripe.db.whois.common.rpsl.ObjectType.ROUTE6;
 @Component
 @Path("/")
 public class WhoisRestService {
+
+    // Specify UTF-8 in response Content-Type.
+    // TODO: [ES] make sure application generates UTF-8 in response.
+    // TODO: [ES] define in a more generic place, and use across whole API.
+    private static final String APPLICATION_JSON_UTF8 = "application/json; charset=utf-8";
+    private static final String APPLICATION_XML_UTF8 = "application/xml; charset=utf-8";
 
     private final RpslObjectDao rpslObjectDao;
     private final RpslObjectStreamer rpslObjectStreamer;
@@ -91,7 +98,7 @@ public class WhoisRestService {
     }
 
     @DELETE
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @Produces({APPLICATION_JSON_UTF8, APPLICATION_XML_UTF8})
     @Path("/{source}/{objectType}/{key:.*}")
     public Response delete(
             @Context final HttpServletRequest request,
@@ -148,8 +155,8 @@ public class WhoisRestService {
     }
 
     @PUT
-    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @Consumes({APPLICATION_XML, APPLICATION_JSON})
+    @Produces({APPLICATION_XML_UTF8, APPLICATION_JSON_UTF8})
     @Path("/{source}/{objectType}/{key:.*}")
     public Response update(
             final WhoisResources resource,
@@ -204,8 +211,8 @@ public class WhoisRestService {
     }
 
     @POST
-    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @Consumes({APPLICATION_XML, APPLICATION_JSON})
+    @Produces({APPLICATION_XML_UTF8, APPLICATION_JSON_UTF8})
     @Path("/{source}/{objectType}")
     public Response create(
             final WhoisResources resource,
@@ -268,7 +275,7 @@ public class WhoisRestService {
      * @return
      */
     @GET
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @Produces({APPLICATION_XML_UTF8, APPLICATION_JSON_UTF8})
     @Path("/{source}/{objectType}/{key:.*}")
     public Response lookup(
             @Context final HttpServletRequest request,

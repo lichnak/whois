@@ -2479,6 +2479,59 @@ public class WhoisRestServiceTestIntegration extends AbstractIntegrationTest {
     }
 
     @Test
+    public void create_xml_response_media_type_charset_is_utf8() {
+        final Response response = RestTest.target(getPort(), "whois/test/person?password=test")
+            .request(MediaType.APPLICATION_XML_TYPE.withCharset("UTF-8"))   // TODO: UTF-8 must be specified in request, to get charset in response
+            .post(Entity.entity("" +
+                    "<whois-resources>\n" +
+                    "    <objects>\n" +
+                    "        <object type=\"person\">\n" +
+                    "            <source id=\"TEST\"/>\n" +
+                    "            <attributes>\n" +
+                    "                <attribute name=\"person\" value=\"Pauleth Palthen\"/>\n" +
+                    "                <attribute name=\"address\" value=\"test \u03A3 and \u00DF characters\"/>\n" +
+                    "                <attribute name=\"phone\" value=\"+31-2-1234567\"/>\n" +
+                    "                <attribute name=\"e-mail\" value=\"noreply@ripe.net\"/>\n" +
+                    "                <attribute name=\"mnt-by\" value=\"OWNER-MNT\"/>\n" +
+                    "                <attribute name=\"nic-hdl\" value=\"PP1-TEST\"/>\n" +
+                    "                <attribute name=\"remarks\" value=\"remark\"/>\n" +
+                    "                <attribute name=\"source\" value=\"TEST\"/>\n" +
+                    "            </attributes>\n" +
+                    "        </object>\n" +
+                    "    </objects>\n" +
+                    "</whois-resources>", MediaType.APPLICATION_XML));
+
+        assertThat(response.getMediaType().toString(), is("application/xml; charset=utf-8"));
+        assertThat(response.readEntity(String.class), containsString("test ? and \u00DF characters"));
+    }
+
+    @Test
+    public void create_json_response_media_type_charset_is_utf8() {
+        final Response response = RestTest.target(getPort(), "whois/test/person?password=test")
+            .request(MediaType.APPLICATION_JSON_TYPE.withCharset("UTF-8"))  // TODO: UTF-8 must be specified in request, to get charset in response
+            .post(Entity.entity("" +
+                    "{ \"objects\": {\n" +
+                    "   \"object\": [ {\n" +
+                    "    \"source\": { \"id\": \"TEST\" }, \n" +
+                    "    \"attributes\": {\n" +
+                    "       \"attribute\": [\n" +
+                    "        { \"name\": \"person\", \"value\": \"Pauleth Palthen\" },\n" +
+                    "        { \"name\": \"address\", \"value\": \"test \u03A3 and \u00DF characters\" },\n" +
+                    "        { \"name\": \"phone\", \"value\": \"+31-2-1234567\" },\n" +
+                    "        { \"name\": \"e-mail\", \"value\": \"noreply@ripe.net\" },\n" +
+                    "        { \"name\": \"mnt-by\", \"value\": \"OWNER-MNT\" },\n" +
+                    "        { \"name\": \"nic-hdl\", \"value\": \"PP1-TEST\" },\n" +
+                    "        { \"name\": \"remarks\", \"value\": \"remark\" },\n" +
+                    "        { \"name\": \"source\", \"value\": \"TEST\" }\n" +
+                    "        ] }\n" +
+                    "    }] \n" +
+                    "}}", MediaType.APPLICATION_JSON_TYPE));
+
+        assertThat(response.getMediaType().toString(), is("application/json; charset=utf-8"));
+        assertThat(response.readEntity(String.class), containsString("test ? and \u00DF characters"));
+    }
+
+    @Test
     public void create_self_referencing_maintainer_password_auth_only() {
         final WhoisResources whoisResources = RestTest.target(getPort(), "whois/test/mntner?password=test")
                 .request()
